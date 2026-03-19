@@ -374,6 +374,18 @@ def pagina_lancamentos(df_lancamentos: pd.DataFrame, config: dict):
         )
 
     st.markdown("---")
+    st.subheader("Detalhes de meta por categoria")
+
+    for categoria in ["ESSENCIAIS", "VARIAVEIS", "LAZER", "RESERVA"]:
+        planejado_cat = resumo_config["valores_planejados"].get(categoria, 0.0)
+        usado_cat = resumo_config["usados"].get(categoria, 0.0)
+        restante_cat = planejado_cat - usado_cat
+        col1, col2, col3 = st.columns(3)
+        col1.metric(f"{categoria} planejado", moeda_br(planejado_cat))
+        col2.metric(f"{categoria} usado", moeda_br(usado_cat), delta=f"{(usado_cat / planejado_cat * 100) if planejado_cat > 0 else 0:.1f}%")
+        col3.metric(f"{categoria} restante", moeda_br(restante_cat))
+
+    st.markdown("---")
     st.subheader("Tabela de lançamentos")
 
     if df_filtrado.empty:
