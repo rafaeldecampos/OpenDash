@@ -19,7 +19,9 @@ def calcular_salario_base(salario_mensal: float, valor_nao_utilizavel: float) ->
 
 def validar_soma_percentuais(percentuais: Dict[str, float]) -> bool:
     total = sum([converter_para_float(percentuais.get(chave, 0)) for chave in CATEGORIAS_FIXAS])
-    return abs(total - 100.0) < 1e-9
+    total_arredondado = round(total, 2)
+    # Tratar 100.00 com tolerância de imprecisão de ponto flutuante
+    return abs(total_arredondado - 100.0) <= 1e-6
 
 
 def ajustar_percentuais_para_100(percentuais: Dict[str, float]) -> Dict[str, float]:

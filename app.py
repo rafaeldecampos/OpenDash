@@ -138,9 +138,15 @@ def pagina_visao_geral(config: dict, df_lancamentos: pd.DataFrame):
     }
 
     soma_val = sum(percentuais.values())
+    soma_val_rounded = round(soma_val, 2)
     if not validar_soma_percentuais(percentuais):
-        st.error("A soma dos percentuais deve ser exatamente 100%. Ajuste em Configurações.")
+        st.error(
+            "A soma dos percentuais deve ser 100%. Ajuste em Configurações. "
+            f"(atual: {soma_val_rounded:.2f}%)"
+        )
         return
+    else:
+        st.success(f"Soma dos percentuais está correta: {soma_val_rounded:.2f}%")
 
     salario_base = calcular_salario_base(salario_mensal, valor_nao_utilizavel)
     resumo = calcular_distribuicao(salario_base, percentuais, df_lancamentos)
@@ -356,12 +362,13 @@ def pagina_lancamentos(df_lancamentos: pd.DataFrame, config: dict):
     resumo_config = calcular_distribuicao(salario_base, percentuais, df_lancamentos)
 
     st.markdown("### Configuração atual e valores planejados")
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
     col1.metric("Salário bruto", moeda_br(salario_mensal))
     col2.metric("Não utilizável", moeda_br(valor_nao_utilizavel))
     col3.metric("Salário base (bruto - não utilizável)", moeda_br(salario_base))
     col4.metric("Receita total", moeda_br(resumo_config["total_receitas"]))
     col5.metric("Despesa total", moeda_br(resumo_config["total_despesas"]))
+    col6.metric("Saldo total atual", moeda_br(resumo_config.get("saldo_planejado", 0.0)))
 
     if salario_mensal <= 0:
         st.warning(
