@@ -466,15 +466,26 @@ def pagina_lancamentos(df_lancamentos: pd.DataFrame, config: dict):
                     edicao = edicao.dropna(how="all", subset=["tipo", "categoria", "data", "descricao", "valor"])
 
                     # Força IDs imutáveis para linhas originais e autoincrement para novas
-                    id_original = df_mostra["id"].tolist()
+                    ids_originais = set(df_mostra["id"].dropna().astype(int).tolist())
                     proximo_id = int(df_lancamentos["id"].max()) if not df_lancamentos.empty else 0
+                    ids_assigned = set()
 
-                    for idx in range(len(edicao)):
-                        if idx < len(id_original):
-                            edicao.at[idx, "id"] = int(id_original[idx])
+                    for idx, row in edicao.iterrows():
+                        id_val = row.get("id") if "id" in row else None
+                        id_val_int = None
+                        if pd.notna(id_val):
+                            try:
+                                id_val_int = int(id_val)
+                            except (TypeError, ValueError, OverflowError):
+                                id_val_int = None
+
+                        if id_val_int is not None and id_val_int in ids_originais and id_val_int not in ids_assigned:
+                            edicao.at[idx, "id"] = id_val_int
+                            ids_assigned.add(id_val_int)
                         else:
                             proximo_id += 1
                             edicao.at[idx, "id"] = proximo_id
+                            ids_assigned.add(proximo_id)
 
                     edicao["id"] = edicao["id"].astype(int)
 

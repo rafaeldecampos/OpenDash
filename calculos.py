@@ -80,8 +80,12 @@ def calcular_distribuicao(salario_base: float, percentuais: Dict[str, float], la
     df["categoria"] = df["categoria"].astype(str).str.upper().fillna("")
 
     for categoria in CATEGORIAS_FIXAS:
-        filtro = (df["tipo"] == "DESPESA") & (df["categoria"] == categoria)
-        usados[categoria] = float(df.loc[filtro, "valor"].sum())
+        filtro_despesa = (df["tipo"] == "DESPESA") & (df["categoria"] == categoria)
+        filtro_receita = (df["tipo"] == "RECEITA") & (df["categoria"] == categoria)
+        despesas = float(df.loc[filtro_despesa, "valor"].sum())
+        receitas = float(df.loc[filtro_receita, "valor"].sum())
+
+        usados[categoria] = despesas - receitas
 
         saldos[categoria] = valores_planejados[categoria] - usados[categoria]
 
